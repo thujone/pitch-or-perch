@@ -1,0 +1,27 @@
+//
+// Load custom fonts, why not.
+//
+
+@font-face {
+  font-family: 'baseball';
+  src: url('/fonts/baseball.woff2') format('woff2'),
+  url('/fonts/baseball.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'batterup';
+  src: url('/fonts/batterup.woff2') format('woff2'),
+  url('/fonts/batterup.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'strikethemout';
+  src: url('/fonts/strikethemout.woff2') format('woff2'),
+  url('/fonts/strikethemout.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

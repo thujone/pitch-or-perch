@@ -1,0 +1,164 @@
+//
+// Font stack variables
+//
+
+$header-font-stack: baseball, Georgia, serif;
+$body-font-stack: strikethemout, Helvetica-Neue, Helvetica, sans-serif;
+
+
+//
+// Colors
+//
+
+$header-color: #3333AA;
+$text-color: #313;
+$link-color: #818;
+$link-hover-color: #616;
+$border-color: #616;
+$hovered-bg-color: #7F7F7F;
+
+
+//
+// General rules
+//
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  color: $text-color;
+}
+
+h1 {
+  float: left;
+  display: block;
+  width: 200px;
+  font: 3.6rem/.3 $header-font-stack;
+  color: $header-color;
+  margin-right: 4em;
+}
+
+h2 {
+  float: left;
+  display: block;
+  font: 1.8rem/.3 $body-font-stack;
+  font-variant: small-caps;
+  color: $header-color;
+  margin-top: 23px;
+}
+
+a {
+  color: $link-color;
+
+  &:hover {
+    color: $link-hover-color;
+  }
+}
+
+//
+// Pitch or Perch
+//
+
+#pitch-or-perch {
+  margin: auto;
+  width: 770px;
+
+  .components {
+    width: 100%;
+
+  }
+}
+
+
+
+//
+// PitcherList
+//
+
+#pitcher-list {
+  float: left;
+  clear: left;
+  height: 85%;
+  overflow-y: scroll;
+  border: 1px double $border-color;
+}
+
+table {
+
+  th {
+    font: 2.4rem/1.6 $header-font-stack;
+    color: $header-color;
+    text-align: left;
+    padding: .25em;
+
+    &.th-name {
+      width: 240px;
+    }
+  }
+  tr {
+
+    td {
+      font: 1.4rem/1.4 $body-font-stack;
+      padding: .25em;
+      overflow: hidden;
+
+    }
+  }
+}
+.td-name {
+  cursor: pointer;
+
+}
+.td-name:hover {
+  background-color: $hovered-bg-color;
+}
+.td-total-score {
+  text-align: center;
+}
+
+
+
+//
+// Pitcher Details
+//
+
+#pitcher-details {
+  float: left;
+  width: 400px;
+  margin-left: 25px;
+  height: 85%;
+  overflow-y: scroll;
+  border: 1px double $border-color;
+  opacity: 0;
+
+  .th-title {
+    vertical-align: top;
+    font-size: 3.4rem;
+    height: 100px;
+  }
+
+  .th-label {
+    width: 200px;
+    font: 2.2rem/.8 $header-font-stack;
+    border: 0;
+
+    &::after {
+      content: ':';
+    }
+  }
+
+  .td-value {
+    width: 220px;
+    font: 1.2rem/1.2 $body-font-stack;
+    padding: .25em;
+    overflow: hidden;
+
+    &.money {
+      &::before {
+        content: '$';
+      }
+    }
+  }
+
+}

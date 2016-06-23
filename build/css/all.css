@@ -1,0 +1,136 @@
+@font-face {
+  font-family: 'baseball';
+  src: url("/fonts/baseball.woff2") format("woff2"), url("/fonts/baseball.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'batterup';
+  src: url("/fonts/batterup.woff2") format("woff2"), url("/fonts/batterup.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'strikethemout';
+  src: url("/fonts/strikethemout.woff2") format("woff2"), url("/fonts/strikethemout.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+html {
+  font-size: 62.5%;
+}
+
+body {
+  color: #313;
+}
+
+h1 {
+  float: left;
+  display: block;
+  width: 200px;
+  font: 3.6rem/0.3 baseball, Georgia, serif;
+  color: #3333AA;
+  margin-right: 4em;
+}
+
+h2 {
+  float: left;
+  display: block;
+  font: 1.8rem/0.3 strikethemout, Helvetica-Neue, Helvetica, sans-serif;
+  font-variant: small-caps;
+  color: #3333AA;
+  margin-top: 23px;
+}
+
+a {
+  color: #818;
+}
+
+a:hover {
+  color: #616;
+}
+
+#pitch-or-perch {
+  margin: auto;
+  width: 770px;
+}
+
+#pitch-or-perch .components {
+  width: 100%;
+}
+
+#pitcher-list {
+  float: left;
+  clear: left;
+  height: 85%;
+  overflow-y: scroll;
+  border: 1px double #616;
+}
+
+table th {
+  font: 2.4rem/1.6 baseball, Georgia, serif;
+  color: #3333AA;
+  text-align: left;
+  padding: .25em;
+}
+
+table th.th-name {
+  width: 240px;
+}
+
+table tr td {
+  font: 1.4rem/1.4 strikethemout, Helvetica-Neue, Helvetica, sans-serif;
+  padding: .25em;
+  overflow: hidden;
+}
+
+.td-name {
+  cursor: pointer;
+}
+
+.td-name:hover {
+  background-color: #7F7F7F;
+}
+
+.td-total-score {
+  text-align: center;
+}
+
+#pitcher-details {
+  float: left;
+  width: 400px;
+  margin-left: 25px;
+  height: 85%;
+  overflow-y: scroll;
+  border: 1px double #616;
+  opacity: 0;
+}
+
+#pitcher-details .th-title {
+  vertical-align: top;
+  font-size: 3.4rem;
+  height: 100px;
+}
+
+#pitcher-details .th-label {
+  width: 200px;
+  font: 2.2rem/0.8 baseball, Georgia, serif;
+  border: 0;
+}
+
+#pitcher-details .th-label::after {
+  content: ':';
+}
+
+#pitcher-details .td-value {
+  width: 220px;
+  font: 1.2rem/1.2 strikethemout, Helvetica-Neue, Helvetica, sans-serif;
+  padding: .25em;
+  overflow: hidden;
+}
+
+#pitcher-details .td-value.money::before {
+  content: '$';
+}
