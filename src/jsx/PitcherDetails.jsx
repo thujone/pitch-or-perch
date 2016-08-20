@@ -11,11 +11,10 @@ const PitcherDetails = React.createClass({
     render: function() {
         let cp = this.props.chosenProjections,
             cd = this.props.chosenDetails;
-        console.log('cp', cp, 'cd', cd);
 
         return (
-            <div id="pitcher-details">
-                <table key="cp.PlayerID" id="player-details-table">
+            <div class="pitcher-details">
+                <table key="cp.PlayerID" class="player-details-table">
                     <thead>
                     </thead>
                     <tbody>

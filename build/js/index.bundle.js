@@ -63,25 +63,88 @@
 	
 	var _PitcherList2 = _interopRequireDefault(_PitcherList);
 	
-	var _PitcherDetails = __webpack_require__(/*! ./PitcherDetails.jsx */ 172);
-	
-	var _PitcherDetails2 = _interopRequireDefault(_PitcherDetails);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var dateObj = new Date();
-	var monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-	var day = dateObj.getDate();
-	var month = monthNames[dateObj.getMonth()];
-	var season = dateObj.getFullYear();
-	var date = season + '-' + month + '-' + day;
-	var fantasyDataKey = '67f93ffa433b4254ae2207537e071134';
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	
+	var monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+	var monthNumbers = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+	var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	
+	var dateObject = new Date();
+	var pad = function pad(str) {
+	    var len = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
+	    var padChar = arguments.length <= 2 || arguments[2] === undefined ? '0' : arguments[2];
+	    var prepend = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+	
+	    str += '';
+	    var padLength = len - str.length;
+	    if (padLength) {
+	        var _arr = [].concat(_toConsumableArray(Array(padLength).keys()));
+	
+	        for (var _i = 0; _i < _arr.length; _i++) {
+	            var item = _arr[_i];
+	            if (prepend) {
+	                str = padChar + str;
+	            } else {
+	                str += padChar;
+	            }
+	        }
+	    }
+	    return str;
+	};
+	var today = {
+	    label: 'today',
+	    day: dateObject.getDate(),
+	    month: monthNames[dateObject.getMonth()],
+	    numeralMonth: monthNumbers[dateObject.getMonth()],
+	    season: dateObject.getFullYear(),
+	    dayOfWeek: dayNames[dateObject.getDay()]
+	};
+	today.dateString = today.season + '-' + today.month + '-' + pad(today.day);
+	today.altDateString = today.season + '-' + today.numeralMonth + '-' + pad(today.day);
+	
+	var tomorrowDateObject = new Date();
+	tomorrowDateObject.setDate(tomorrowDateObject.getDate() + 1);
+	var tomorrow = {
+	    label: '',
+	    day: tomorrowDateObject.getDate(),
+	    month: monthNames[tomorrowDateObject.getMonth()],
+	    numeralMonth: monthNumbers[dateObject.getMonth()],
+	    season: tomorrowDateObject.getFullYear(),
+	    dayOfWeek: dayNames[tomorrowDateObject.getDay()]
+	};
+	tomorrow.dateString = tomorrow.season + '-' + tomorrow.month + '-' + pad(tomorrow.day);
+	tomorrow.altDateString = tomorrow.season + '-' + tomorrow.numeralMonth + '-' + pad(tomorrow.day);
+	
+	var twoDaysDateObject = new Date();
+	twoDaysDateObject.setDate(twoDaysDateObject.getDate() + 2);
+	var twoDays = {
+	    label: '',
+	    day: twoDaysDateObject.getDate(),
+	    month: monthNames[twoDaysDateObject.getMonth()],
+	    numeralMonth: monthNumbers[dateObject.getMonth()],
+	    season: twoDaysDateObject.getFullYear(),
+	    dayOfWeek: dayNames[twoDaysDateObject.getDay()]
+	};
+	twoDays.dateString = twoDays.season + '-' + twoDays.month + '-' + pad(twoDays.day);
+	twoDays.altDateString = twoDays.season + '-' + twoDays.numeralMonth + '-' + pad(twoDays.day);
+	
+	var selectedDate = today; // This changes if the user changes the date pulldown
+	var dates = [today, tomorrow, twoDays];
+	var fantasyDataKey = '0c777943c21e4f4c934f933ea3940fad';
 	var fantasyDataUrl = 'https://api.fantasydata.net/mlb/v2/json';
-	var boxScoresUrl = fantasyDataUrl + '/BoxScores/' + date;
-	var pitcherDetailsUrl = fantasyDataUrl + '/Player/';
-	var pitcherStatsUrl = fantasyDataUrl + '/PlayerSeasonStatsByPlayer/' + season + '/';
-	var dailyLineupsUrl = fantasyDataUrl + '/PlayerGameProjectionStatsByDate/' + date;
-	var jsonp = __webpack_require__(/*! jsonp-es6 */ 171);
+	var getPitcherDetailsUrl = function getPitcherDetailsUrl(pitcherId) {
+	    return fantasyDataUrl + '/Player/' + pitcherId;
+	};
+	var getPitcherStatsUrl = function getPitcherStatsUrl(season, pitcherId) {
+	    return fantasyDataUrl + '/PlayerSeasonStatsByPlayer/' + season + '/' + pitcherId;
+	};
+	var getDailyLineupsUrl = function getDailyLineupsUrl(date) {
+	    return fantasyDataUrl + '/PlayerGameProjectionStatsByDate/' + date.dateString;
+	};
+	
+	var jsonp = __webpack_require__(/*! jsonp-es6 */ 172);
 	var jsonpParams = { key: fantasyDataKey };
 	var hexRed = '#DD0000';
 	var hexYellow = '#DDDD00';
@@ -146,11 +209,13 @@
 	
 	    // Load daily lineups feed
 	    loadDailyLineups: function loadDailyLineups() {
-	        this.dailyLineupsRequest = this.getJSONP(this.props.dailyLineupsUrl, jsonpParams, this.handleDailyLineupsResponse);
+	        this.dailyLineupsRequest = this.getJSONP(getDailyLineupsUrl(selectedDate), jsonpParams, this.handleDailyLineupsResponse);
 	    },
 	
 	    // Process the daily lineups data
 	    handleDailyLineupsResponse: function handleDailyLineupsResponse(response) {
+	        pitcherNodes = [];
+	        this.setState({ pitcherNodes: [] });
 	        var _iteratorNormalCompletion = true;
 	        var _didIteratorError = false;
 	        var _iteratorError = undefined;
@@ -161,7 +226,9 @@
 	
 	
 	                // If the player is a pitcher and will pitch today
-	                if ((item.Position === "SP" || item.Position === "P") && item.FantasyPoints > 0) {
+	                if ((item.Position === "SP" || item.Position === "P") && item.FantasyPoints > 0 && item.DateTime.indexOf(selectedDate.altDateString) > -1) {
+	
+	                    console.log('item.DateTime', item.DateTime, 'selectedDate.altDateString', selectedDate.altDateString);
 	
 	                    // Calculate the pitcher's score
 	
@@ -187,6 +254,7 @@
 	
 	                    // Store data in state
 	                    this.setState({ pitcherProjections: pitcherProjections, pitcherNodes: pitcherNodes });
+	                    //pitcherNodes = [];
 	
 	                    // Load pitcher details for this player
 	                    this.loadPitcherDetails(item.PlayerID);
@@ -206,12 +274,14 @@
 	                }
 	            }
 	        }
+	
+	        console.log('pitcherNodes', pitcherNodes);
 	    },
 	
 	    // Get pitcher details from FantasyData
 	    loadPitcherDetails: function loadPitcherDetails(pitcherId) {
-	        this.getJSONP(pitcherDetailsUrl + pitcherId, jsonpParams, this.handlePitcherDetailsResponse);
-	        this.getJSONP(pitcherStatsUrl + pitcherId, jsonpParams, this.handlePitcherStatsResponse);
+	        this.getJSONP(getPitcherDetailsUrl(pitcherId), jsonpParams, this.handlePitcherDetailsResponse);
+	        this.getJSONP(getPitcherStatsUrl(selectedDate.season, pitcherId), jsonpParams, this.handlePitcherStatsResponse);
 	    },
 	
 	    // Process player details for each pitcher
@@ -238,7 +308,7 @@
 	        var color = void 0;
 	        if (total >= 100) {
 	            color = hexGreen;
-	        } else if (total > 90) {
+	        } else if (total > 85) {
 	            color = hexYellow;
 	        } else {
 	            color = hexRed;
@@ -252,8 +322,24 @@
 	            chosenProjections: this.state.pitcherProjections['pitcher' + playerId],
 	            chosenDetails: this.state.pitcherDetails['pitcher' + playerId]
 	        });
+	        //var el = document.querySelector('#pitcher-details');
+	        //this.fadeIn(el);
+	        debugger;
+	        document.getElementById(playerId).appendChild(document.getElementById('pitcher-details'));
+	    },
+	
+	    handleDateSelect: function handleDateSelect(event) {
+	        var chosenDate = _.find(dates, { 'dateString': event.target.value });
+	        selectedDate = chosenDate;
+	        this.setState({
+	            pitcherProjections: [],
+	            pitcherDetails: [],
+	            pitcherStats: [],
+	            pitcherNodes: []
+	        });
 	        var el = document.querySelector('#pitcher-details');
-	        this.fadeIn(el);
+	        this.fadeOut(el);
+	        this.loadDailyLineups();
 	    },
 	
 	    // Generic fade-out effect for the PlayerDetails panel
@@ -268,7 +354,7 @@
 	        })();
 	    },
 	
-	    // Generic fade-in effet for the PlayerDetails panel
+	    // Generic fade-in effect for the PlayerDetails panel
 	    fadeIn: function fadeIn(el) {
 	        var display = arguments.length <= 1 || arguments[1] === undefined ? "block" : arguments[1];
 	
@@ -284,6 +370,16 @@
 	    },
 	
 	    render: function render() {
+	        var dateSelectorOptions = dates.map(function (date) {
+	            return _react2.default.createElement(
+	                'option',
+	                { key: date.dateString, value: date.dateString },
+	                date.dateString,
+	                ' ',
+	                date.label ? '(' + date.label + ')' : ''
+	            );
+	        });
+	
 	        return _react2.default.createElement(
 	            'div',
 	            { id: 'pitch-or-perch' },
@@ -293,20 +389,18 @@
 	                'Pitch or Perch9'
 	            ),
 	            _react2.default.createElement(
-	                'h2',
-	                null,
-	                date
-	            ),
-	            _react2.default.createElement(
 	                'div',
 	                { className: 'components' },
+	                _react2.default.createElement(
+	                    'select',
+	                    { id: 'date-selector', value: selectedDate.dateString, onChange: this.handleDateSelect },
+	                    dateSelectorOptions
+	                ),
 	                _react2.default.createElement(_PitcherList2.default, {
 	                    pitcherProjections: this.state.pitcherProjections,
 	                    pitcherDetails: this.state.pitcherDetails,
 	                    pitcherNodes: this.state.pitcherNodes,
-	                    onPlayerClick: this.handlePlayerClick
-	                }),
-	                _react2.default.createElement(_PitcherDetails2.default, {
+	                    onPlayerClick: this.handlePlayerClick,
 	                    chosenProjections: this.state.chosenProjections,
 	                    chosenDetails: this.state.chosenDetails
 	                })
@@ -315,7 +409,7 @@
 	    }
 	});
 	
-	_reactDom2.default.render(_react2.default.createElement(PitchOrPerch, { boxScoresUrl: boxScoresUrl, dailyLineupsUrl: dailyLineupsUrl }), document.getElementById('app'));
+	_reactDom2.default.render(_react2.default.createElement(PitchOrPerch, null), document.getElementById('app'));
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! lodash */ 1)))
 
 /***/ },
@@ -37527,16 +37621,20 @@
   \*********************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	var _react = __webpack_require__(/*! react */ 3);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _PitcherDetails = __webpack_require__(/*! ./PitcherDetails.jsx */ 171);
+	
+	var _PitcherDetails2 = _interopRequireDefault(_PitcherDetails);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var PitcherList = _react2.default.createClass({
-	    displayName: "PitcherList",
+	    displayName: 'PitcherList',
 	
 	
 	    getInitialState: function getInitialState() {
@@ -37548,29 +37646,49 @@
 	    },
 	
 	    handlePlayerClick: function handlePlayerClick(event) {
+	        debugger;
 	        this.props.onPlayerClick(event.target.id);
+	    },
+	
+	    skipClickDelay: function skipClickDelay(event) {
+	        event.preventDefault();
+	        event.target.click();
 	    },
 	
 	    render: function render() {
 	        var _this = this;
 	
+	        var i = 0;
 	        var pitcherNodes = this.props.pitcherNodes.map(function (pitcher) {
+	            ++i;
+	            /*this.setState({
+	                chosenProjections: this.props.pitcherProjections['pitcher' + pitcher.PlayerID],
+	                chosenDetails: this.props.pitcherDetails['pitcher' + pitcher.PlayerID]
+	            });*/
+	            debugger;
 	
 	            return _react2.default.createElement(
-	                "tr",
+	                'tr',
 	                {
-	                    key: pitcher.PlayerID
+	                    key: pitcher.PlayerID,
+	                    className: 'player-header',
+	                    'aria-expanded': 'false',
+	                    'aria-controls': 'accordion' + i
 	                },
 	                _react2.default.createElement(
-	                    "td",
-	                    { className: "td-name",
-	                        onClick: _this.handlePlayerClick,
-	                        id: pitcher.PlayerID },
-	                    pitcher.Name
+	                    'td',
+	                    { className: 'td-name',
+	                        id: pitcher.PlayerID,
+	                        onClick: _this.handlePlayerClick },
+	                    pitcher.Name,
+	                    _react2.default.createElement(_PitcherDetails2.default, {
+	                        chosenProjections: _this.props.pitcherProjections['pitcher' + pitcher.PlayerID],
+	                        chosenDetails: _this.props.pitcherDetails['pitcher' + pitcher.PlayerID]
+	                    })
 	                ),
 	                _react2.default.createElement(
-	                    "td",
-	                    { className: "td-total-score",
+	                    'td',
+	                    { className: 'td-total-score',
 	                        style: { backgroundColor: pitcher.TotalScoreColor,
 	                            textAlign: "center" } },
 	                    pitcher.TotalScore
@@ -37579,31 +37697,31 @@
 	        });
 	
 	        return _react2.default.createElement(
-	            "div",
-	            { id: "pitcher-list" },
+	            'div',
+	            { id: 'pitcher-list' },
 	            _react2.default.createElement(
-	                "table",
-	                { id: "pitcher-list-table" },
+	                'table',
+	                { id: 'pitcher-list-table' },
 	                _react2.default.createElement(
-	                    "thead",
+	                    'thead',
 	                    null,
 	                    _react2.default.createElement(
-	                        "tr",
+	                        'tr',
 	                        null,
 	                        _react2.default.createElement(
-	                            "th",
-	                            { className: "th-name" },
-	                            "Name"
+	                            'th',
+	                            { className: 'th-name' },
+	                            'Name'
 	                        ),
 	                        _react2.default.createElement(
-	                            "th",
-	                            { className: "th-score" },
-	                            "Score"
+	                            'th',
+	                            { className: 'th-score' },
+	                            'Score'
 	                        )
 	                    )
 	                ),
 	                _react2.default.createElement(
-	                    "tbody",
+	                    'tbody',
 	                    null,
 	                    pitcherNodes
 	                )
@@ -37616,6 +37734,249 @@
 
 /***/ },
 /* 171 */
+/*!************************************!*\
+  !*** ./src/jsx/PitcherDetails.jsx ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _react = __webpack_require__(/*! react */ 3);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var PitcherDetails = _react2.default.createClass({
+	    displayName: "PitcherDetails",
+	
+	
+	    getInitialState: function getInitialState() {
+	        return {};
+	    },
+	
+	    render: function render() {
+	        var cp = this.props.chosenProjections,
+	            cd = this.props.chosenDetails;
+	
+	        return _react2.default.createElement(
+	            "div",
+	            { "class": "pitcher-details" },
+	            _react2.default.createElement(
+	                "table",
+	                { key: "cp.PlayerID", "class": "player-details-table" },
+	                _react2.default.createElement("thead", null),
+	                _react2.default.createElement(
+	                    "tbody",
+	                    null,
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-title" },
+	                            "Projections7"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            null,
+	                            _react2.default.createElement("img", { src: cd.PhotoUrl,
+	                                alt: cp.Name
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Name"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.Name
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Team"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.Team
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Opponent"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.Opponent
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Pitching"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.HomeOrAway
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Throws"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cd.ThrowHand
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "MLB Salary"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value money" },
+	                            cd.Salary
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "DraftKings Salary"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value money" },
+	                            cp.DraftKingsSalary
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "FanDuel Salary"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value money" },
+	                            cp.FanDuelSalary
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Yahoo Salary"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value money" },
+	                            cp.YahooSalary
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Projected Earned Runs"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.PitchingEarnedRuns
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Projected Strikeouts"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.PitchingStrikeouts
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Projected Walks"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.PitchingWalks
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        "tr",
+	                        null,
+	                        _react2.default.createElement(
+	                            "th",
+	                            { className: "th-label" },
+	                            "Projected Hits Allowed"
+	                        ),
+	                        _react2.default.createElement(
+	                            "td",
+	                            { className: "td-value" },
+	                            cp.PitchingHits
+	                        )
+	                    )
+	                )
+	            )
+	        );
+	    }
+	});
+	
+	module.exports = PitcherDetails;
+
+/***/ },
+/* 172 */
 /*!******************************!*\
   !*** ./~/jsonp-es6/index.js ***!
   \******************************/
@@ -37730,250 +38091,6 @@
 	})(module, window);
 	
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../webpack/buildin/module.js */ 2)(module)))
-
-/***/ },
-/* 172 */
-/*!************************************!*\
-  !*** ./src/jsx/PitcherDetails.jsx ***!
-  \************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _react = __webpack_require__(/*! react */ 3);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var PitcherDetails = _react2.default.createClass({
-	    displayName: 'PitcherDetails',
-	
-	
-	    getInitialState: function getInitialState() {
-	        return {};
-	    },
-	
-	    render: function render() {
-	        var cp = this.props.chosenProjections,
-	            cd = this.props.chosenDetails;
-	        console.log('cp', cp, 'cd', cd);
-	
-	        return _react2.default.createElement(
-	            'div',
-	            { id: 'pitcher-details' },
-	            _react2.default.createElement(
-	                'table',
-	                { key: 'cp.PlayerID', id: 'player-details-table' },
-	                _react2.default.createElement('thead', null),
-	                _react2.default.createElement(
-	                    'tbody',
-	                    null,
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-title' },
-	                            'Projections7'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            null,
-	                            _react2.default.createElement('img', { src: cd.PhotoUrl,
-	                                alt: cp.Name
-	                            })
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Name'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.Name
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Team'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.Team
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Opponent'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.Opponent
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Pitching'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.HomeOrAway
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Throws'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cd.ThrowHand
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'MLB Salary'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value money' },
-	                            cd.Salary
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'DraftKings Salary'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value money' },
-	                            cp.DraftKingsSalary
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'FanDuel Salary'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value money' },
-	                            cp.FanDuelSalary
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Yahoo Salary'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value money' },
-	                            cp.YahooSalary
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Projected Earned Runs'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.PitchingEarnedRuns
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Projected Strikeouts'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.PitchingStrikeouts
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Projected Walks'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.PitchingWalks
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        _react2.default.createElement(
-	                            'th',
-	                            { className: 'th-label' },
-	                            'Projected Hits Allowed'
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            { className: 'td-value' },
-	                            cp.PitchingHits
-	                        )
-	                    )
-	                )
-	            )
-	        );
-	    }
-	});
-	
-	module.exports = PitcherDetails;
 
 /***/ }
 /******/ ]);

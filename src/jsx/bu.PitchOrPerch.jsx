@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
 import PitcherList from './PitcherList.jsx';
+import PitcherDetails from './PitcherDetails.jsx';
 
 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const monthNumbers = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
@@ -135,7 +136,7 @@ const PitchOrPerch = React.createClass({
     // Load daily lineups feed
     loadDailyLineups: function() {
         this.dailyLineupsRequest = this.getJSONP(getDailyLineupsUrl(selectedDate), jsonpParams,
-            this.handleDailyLineupsResponse);
+                this.handleDailyLineupsResponse);
     },
 
     // Process the daily lineups data
@@ -222,16 +223,14 @@ const PitchOrPerch = React.createClass({
 
     // When the user clicks a new player, we need to change the state so the view can re-render
     handlePlayerClick: function(playerId) {
+        debugger;
         this.setState({
-            chosenProjections: this.state.pitcherProjections['pitcher' + playerId],
-            chosenDetails: this.state.pitcherDetails['pitcher' + playerId]
+             chosenProjections: this.state.pitcherProjections['pitcher' + playerId],
+             chosenDetails: this.state.pitcherDetails['pitcher' + playerId]
         });
-        //var el = document.querySelector('#pitcher-details');
-        //this.fadeIn(el);
-debugger;
-        document.getElementById(playerId).appendChild(document.getElementById('pitcher-details'));
-
-
+        var el = document.querySelector('#pitcher-details');
+        this.fadeIn(el);
+        
     },
 
     handleDateSelect: function(event) {
@@ -294,6 +293,8 @@ debugger;
                         pitcherDetails = {this.state.pitcherDetails}
                         pitcherNodes = {this.state.pitcherNodes}
                         onPlayerClick = {this.handlePlayerClick}
+                    />
+                    <PitcherDetails
                         chosenProjections = {this.state.chosenProjections}
                         chosenDetails = {this.state.chosenDetails}
                     />

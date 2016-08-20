@@ -1,0 +1,19 @@
+let jillsFriends = ['A', 'D', 'E', 'Z'];
+let johnsFriends = ['B', 'E', 'H'];
+let mutualFriends = [];
+console.log(_.union(jillsFriends, johnsFriends));
+
+for (let i of jillsFriends) {
+
+    for (let j of johnsFriends) {
+
+        // if j is before i in the alphabet, skip it
+        if (j < i) {
+            continue;
+        } else if (i === j) {
+            mutualFriends.push(i);
+        }
+    }
+}
+console.log(mutualFriends);
+
