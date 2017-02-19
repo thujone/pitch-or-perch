@@ -8,7 +8,8 @@ const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 
 
 
-let dateObject = new Date();
+//let dateObject = new Date();
+let dateObject = new Date("September 30, 2016 10:00:00");
 const pad = function (str, len = 2, padChar = '0', prepend = true) {
     str += '';
     let padLength = len - str.length;
@@ -34,7 +35,10 @@ let today = {
 today.dateString = `${today.season}-${today.month}-${pad(today.day)}`;
 today.altDateString = `${today.season}-${today.numeralMonth}-${pad(today.day)}`;
 
-let tomorrowDateObject = new Date();
+console.log("Today: " + today.dateString);
+
+//let tomorrowDateObject = new Date();
+let tomorrowDateObject = new Date("October 1, 2016 10:00:00");
 tomorrowDateObject.setDate(tomorrowDateObject.getDate() + 1);
 let tomorrow = {
     label: '',
@@ -47,7 +51,8 @@ let tomorrow = {
 tomorrow.dateString = `${tomorrow.season}-${tomorrow.month}-${pad(tomorrow.day)}`;
 tomorrow.altDateString = `${tomorrow.season}-${tomorrow.numeralMonth}-${pad(tomorrow.day)}`;
 
-let twoDaysDateObject = new Date();
+//let twoDaysDateObject = new Date();
+let twoDaysDateObject = new Date("October 2, 2016 10:00:00");
 twoDaysDateObject.setDate(twoDaysDateObject.getDate() + 2);
 let twoDays = {
     label: '',
@@ -80,7 +85,12 @@ const hexRed = '#DD0000';
 const hexYellow = '#DDDD00';
 const hexGreen = '#00BB00';
 
-let pitcherProjections = [], pitcherDetails = [], pitcherStats = [], pitcherNodes = [];
+let pitcherProjections = [],
+    pitcherDetails = [],
+    pitcherStats = [],
+    pitcherNodes = [],
+    detailsLoaded = 0,
+    statsLoaded = 0;
 
 // Entry point for the "Pitch or Perch" fantasy baseball app
 const PitchOrPerch = React.createClass({
@@ -141,19 +151,14 @@ const PitchOrPerch = React.createClass({
     // Process the daily lineups data
     handleDailyLineupsResponse: function(response) {
         pitcherNodes = [];
-        this.setState( {pitcherNodes: []} );
         for (let item of response) {
 
             // If the player is a pitcher and will pitch today
             if (
-                (item.Position === "SP" || item.Position === "P") &&
-                item.FantasyPoints > 0 &&
-                item.DateTime.indexOf(selectedDate.altDateString) > -1
+                (item['Position'] === "SP" || item['Position'] === "P") &&
+                item['FantasyPoints'] > 0 &&
+                item['DateTime'].indexOf(selectedDate.altDateString) > -1
             ) {
-
-                console.log('item.DateTime', item.DateTime, 'selectedDate.altDateString', selectedDate.altDateString);
-
-
                 // Calculate the pitcher's score
                 let [totalScore, totalScoreColor] = this.calculateScore(item);
                 item.TotalScore = totalScore;
@@ -161,45 +166,56 @@ const PitchOrPerch = React.createClass({
 
                 // Store data
                 pitcherNodes.push(item);
-                pitcherProjections['pitcher' + item.PlayerID] = item;
-
-                // Sort pitcher list by last name
-                pitcherNodes = _.sortBy(pitcherNodes, function(item) {
-                    let names = item.Name.split(' ');
-                    return names[1];
-                });
-
-                // Store data in state
-                this.setState({pitcherProjections: pitcherProjections, pitcherNodes: pitcherNodes});
-                //pitcherNodes = [];
-
-                // Load pitcher details for this player
-                this.loadPitcherDetails(item.PlayerID);
+                pitcherProjections['pitcher' + item['PlayerID']] = item;
             }
         }
-        console.log('pitcherNodes', pitcherNodes);
 
+        // Sort pitcher list by last name
+        pitcherNodes = _.sortBy(pitcherNodes, function(item) {
+            let names = item.Name.split(' ');
+            return names[1];
+        });
+
+        // Load pitcher details for this player
+        pitcherNodes.forEach(function (i) {
+            this.loadPitcherDetails(i['PlayerID']);
+        }, this);
+
+        console.log('pitcherNodes', pitcherNodes);
     },
 
     // Get pitcher details from FantasyData
     loadPitcherDetails: function(pitcherId) {
         this.getJSONP(getPitcherDetailsUrl(pitcherId), jsonpParams, this.handlePitcherDetailsResponse);
         this.getJSONP(getPitcherStatsUrl(selectedDate.season, pitcherId), jsonpParams, this.handlePitcherStatsResponse);
-
     },
 
     // Process player details for each pitcher
     handlePitcherDetailsResponse: function(response) {
         pitcherDetails['pitcher' + response.PlayerID] = response;
-        this.setState({pitcherDetails: pitcherDetails});
+        detailsLoaded ++;
+        this.checkDataLoadComplete();
         //console.log('pitcherDetails', pitcherDetails);
     },
 
     // Process player stats for each pitcher
     handlePitcherStatsResponse: function(response) {
         pitcherStats['pitcher' + response.PlayerID] = response;
-        this.setState({pitcherStats: pitcherStats});
+        statsLoaded ++;
+        this.checkDataLoadComplete();
         //console.log('pitcherStats', pitcherStats);
+    },
+
+    checkDataLoadComplete: function() {
+        if (detailsLoaded == pitcherNodes.length &&
+            statsLoaded == pitcherNodes.length) {
+            // all data loaded
+            this.setState({ pitcherProjections: pitcherProjections,
+                            pitcherNodes: pitcherNodes,
+                            pitcherDetails: pitcherDetails,
+                            pitcherStats: pitcherStats
+            });
+        }
     },
 
     // Create a score for each pitcher, based on various feeds' fantasy point projections
@@ -228,9 +244,7 @@ const PitchOrPerch = React.createClass({
         });
         //var el = document.querySelector('#pitcher-details');
         //this.fadeIn(el);
-debugger;
         document.getElementById(playerId).appendChild(document.getElementById('pitcher-details'));
-
 
     },
 
@@ -293,6 +307,7 @@ debugger;
                         pitcherProjections = {this.state.pitcherProjections}
                         pitcherDetails = {this.state.pitcherDetails}
                         pitcherNodes = {this.state.pitcherNodes}
+                        pitcherStats = {this.state.pitcherStats}
                         onPlayerClick = {this.handlePlayerClick}
                         chosenProjections = {this.state.chosenProjections}
                         chosenDetails = {this.state.chosenDetails}

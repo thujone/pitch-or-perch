@@ -33,7 +33,6 @@ const PitcherList = React.createClass({
                 chosenProjections: this.props.pitcherProjections['pitcher' + pitcher.PlayerID],
                 chosenDetails: this.props.pitcherDetails['pitcher' + pitcher.PlayerID]
             });*/
-            debugger;
             
             return (
                 <tr
