@@ -8,22 +8,13 @@ var config = {
     module: {
         loaders: [
             {
-                test: /\.js$/,
+                test: /\.jsx?$/,
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015']
+                    presets: ['es2015', 'react']
                 }
             },
-
-            {
-                test: /\.jsx$/,
-                include: SRC_DIR,
-                loader: 'babel-loader',
-                exclude: /node_modules/
-            },
-
-
 
             {
                 test: /\.html$/,
