@@ -197,7 +197,7 @@
 	    },
 	
 	    // Return JSON
-	    getJSON: function getJSON(url, callback) {
+	    getJSON: function getJSON(url, callback, failback) {
 	        var request = new XMLHttpRequest();
 	        request.open('GET', url, true);
 	        request.setRequestHeader('Ocp-Apim-Subscription-Key', fantasyDataKey);
@@ -210,6 +210,7 @@
 	        };
 	        request.onerror = function (error) {
 	            console.log('Request error', error);
+	            if (failback) failback(error);
 	        };
 	        request.send();
 	    },
@@ -221,6 +222,7 @@
 	
 	    // Process the daily lineups data
 	    handleDailyLineupsResponse: function handleDailyLineupsResponse(response) {
+	        var root = this;
 	        pitcherNodes = [];
 	        var _iteratorNormalCompletion = true;
 	        var _didIteratorError = false;
@@ -245,6 +247,7 @@
 	                    // Store data
 	                    pitcherNodes.push(item);
 	                    pitcherProjections['pitcher' + item['PlayerID']] = item;
+	                    pitcherProjections[item['Name']] = item;
 	                }
 	            }
 	
@@ -269,15 +272,35 @@
 	            return names[1];
 	        });
 	
-	        // Load pitcher details for this player
-	        pitcherNodes.forEach(function (i) {
-	            this.loadPitcherDetails(i['PlayerID']);
-	        }, this);
-	
 	        console.log('pitcherNodes', pitcherNodes);
+	
+	        var getDetails = function getDetails() {
+	            // Load pitcher details for this player
+	            pitcherNodes.forEach(function (i) {
+	                root.loadPitcherDetails(i['PlayerID']);
+	            }, root);
+	        };
+	
+	        // look for any overrides for the days we're projecting
+	        var getOverrides = function getOverrides(obj) {
+	            // resolve list of overrides
+	            for (var pitcher in obj) {
+	                var projIndex = pitcherNodes.indexOf(pitcherProjections[pitcher]);
+	                if (projIndex == -1) continue;
+	                if (obj[pitcher]['active'] == false) pitcherNodes.splice(projIndex, 1);
+	                if (obj[pitcher]['score']) {
+	                    pitcherNodes[projIndex].TotalScore = obj[pitcher]['score'];
+	                    pitcherNodes[projIndex].TotalScoreColor = root.getScoreColor(obj[pitcher]['score']);
+	                }
+	            }
+	            // load details with updated values
+	            getDetails();
+	        };
+	
+	        this.getJSON('overrides/' + selectedDate.dateString + '.json', getOverrides, getDetails);
 	    },
 	
-	    // Get pitcher details from FantasyData
+	    // Get pitcher detailsx from FantasyData
 	    loadPitcherDetails: function loadPitcherDetails(pitcherId) {
 	        this.getJSONP(getPitcherDetailsUrl(pitcherId), jsonpParams, this.handlePitcherDetailsResponse);
 	        this.getJSONP(getPitcherStatsUrl(selectedDate.season, pitcherId), jsonpParams, this.handlePitcherStatsResponse);
@@ -310,6 +333,18 @@
 	        }
 	    },
 	
+	    getScoreColor: function getScoreColor(score) {
+	        var color = void 0;
+	        if (score >= 100) {
+	            color = hexGreen;
+	        } else if (score > 85) {
+	            color = hexYellow;
+	        } else {
+	            color = hexRed;
+	        }
+	        return color;
+	    },
+	
 	    // Create a score for each pitcher, based on various feeds' fantasy point projections
 	    calculateScore: function calculateScore(item) {
 	        var fp = item.FantasyPoints * 5,
@@ -317,15 +352,8 @@
 	            fpfd = item.FantasyPointsFanDuel,
 	            fpy = item.FantasyPointsYahoo;
 	        var total = parseInt(fp + fpdk + fpfd + fpy);
-	        var color = void 0;
-	        if (total >= 100) {
-	            color = hexGreen;
-	        } else if (total > 85) {
-	            color = hexYellow;
-	        } else {
-	            color = hexRed;
-	        }
-	        return [total, color];
+	
+	        return [total, this.getScoreColor(total)];
 	    },
 	
 	    // When the user clicks a new player, we need to change the state so the view can re-render

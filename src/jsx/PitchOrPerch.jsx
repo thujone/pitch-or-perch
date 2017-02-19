@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom';
 import PitcherList from './PitcherList.jsx';
 
+
 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const monthNumbers = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -125,7 +126,7 @@ const PitchOrPerch = React.createClass({
     },
 
     // Return JSON
-    getJSON: function(url, callback) {
+    getJSON: function(url, callback, failback) {
         let request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.setRequestHeader('Ocp-Apim-Subscription-Key', fantasyDataKey);
@@ -138,6 +139,7 @@ const PitchOrPerch = React.createClass({
         };
         request.onerror = function(error) {
             console.log('Request error', error);
+            if (failback) failback(error);
         };
         request.send();
     },
@@ -150,6 +152,7 @@ const PitchOrPerch = React.createClass({
 
     // Process the daily lineups data
     handleDailyLineupsResponse: function(response) {
+        let root = this;
         pitcherNodes = [];
         for (let item of response) {
 
@@ -167,6 +170,7 @@ const PitchOrPerch = React.createClass({
                 // Store data
                 pitcherNodes.push(item);
                 pitcherProjections['pitcher' + item['PlayerID']] = item;
+                pitcherProjections[item['Name']] = item;
             }
         }
 
@@ -176,15 +180,33 @@ const PitchOrPerch = React.createClass({
             return names[1];
         });
 
-        // Load pitcher details for this player
-        pitcherNodes.forEach(function (i) {
-            this.loadPitcherDetails(i['PlayerID']);
-        }, this);
-
         console.log('pitcherNodes', pitcherNodes);
+
+        let getDetails = function () {
+            // Load pitcher details for this player
+            pitcherNodes.forEach(function (i) { root.loadPitcherDetails(i['PlayerID']); }, root);
+        };
+
+        // look for any overrides for the days we're projecting
+        let getOverrides = function(obj) {
+            // resolve list of overrides
+            for (var pitcher in obj) {
+                var projIndex = pitcherNodes.indexOf(pitcherProjections[pitcher]);
+                if (projIndex == -1) continue;
+                if (obj[pitcher]['active'] == false) pitcherNodes.splice(projIndex, 1);
+                if (obj[pitcher]['score']){
+                    pitcherNodes[projIndex].TotalScore = obj[pitcher]['score'];
+                    pitcherNodes[projIndex].TotalScoreColor = root.getScoreColor(obj[pitcher]['score']);
+                }
+            }
+            // load details with updated values
+            getDetails();
+        };
+
+        this.getJSON('overrides/' + selectedDate.dateString + '.json', getOverrides, getDetails);
     },
 
-    // Get pitcher details from FantasyData
+    // Get pitcher detailsx from FantasyData
     loadPitcherDetails: function(pitcherId) {
         this.getJSONP(getPitcherDetailsUrl(pitcherId), jsonpParams, this.handlePitcherDetailsResponse);
         this.getJSONP(getPitcherStatsUrl(selectedDate.season, pitcherId), jsonpParams, this.handlePitcherStatsResponse);
@@ -218,6 +240,18 @@ const PitchOrPerch = React.createClass({
         }
     },
 
+    getScoreColor: function(score) {
+        let color;
+        if (score >= 100) {
+            color = hexGreen;
+        } else if (score > 85) {
+            color = hexYellow;
+        } else {
+            color = hexRed;
+        }
+        return color;
+    },
+
     // Create a score for each pitcher, based on various feeds' fantasy point projections
     calculateScore: function(item) {
         let fp = item.FantasyPoints * 5,
@@ -225,15 +259,8 @@ const PitchOrPerch = React.createClass({
             fpfd = item.FantasyPointsFanDuel,
             fpy = item.FantasyPointsYahoo;
         let total = parseInt(fp + fpdk + fpfd + fpy);
-        let color;
-        if (total >= 100) {
-            color = hexGreen;
-        } else if (total > 85) {
-            color = hexYellow;
-        } else {
-            color = hexRed;
-        }
-        return [total, color];
+
+        return [total, this.getScoreColor(total)];
     },
 
     // When the user clicks a new player, we need to change the state so the view can re-render
