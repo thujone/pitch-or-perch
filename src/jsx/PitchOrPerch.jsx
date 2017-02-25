@@ -40,7 +40,7 @@ console.log("Today: " + today.dateString);
 
 //let tomorrowDateObject = new Date();
 let tomorrowDateObject = new Date("October 1, 2016 10:00:00");
-tomorrowDateObject.setDate(tomorrowDateObject.getDate() + 1);
+tomorrowDateObject.setDate(tomorrowDateObject.getDate());
 let tomorrow = {
     label: '',
     day: tomorrowDateObject.getDate(),
@@ -54,7 +54,7 @@ tomorrow.altDateString = `${tomorrow.season}-${tomorrow.numeralMonth}-${pad(tomo
 
 //let twoDaysDateObject = new Date();
 let twoDaysDateObject = new Date("October 2, 2016 10:00:00");
-twoDaysDateObject.setDate(twoDaysDateObject.getDate() + 2);
+twoDaysDateObject.setDate(twoDaysDateObject.getDate());
 let twoDays = {
     label: '',
     day: twoDaysDateObject.getDate(),
