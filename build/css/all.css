@@ -81,6 +81,24 @@ ul {
   display: none;
 }
 
+/* Sanfona Accordion stuff */
+
+.accordion-list {
+  width: 310px;
+  padding: .55em;
+}
+
+.accordion-list-item {
+  font: 1.4rem/1.4 strikethemout, Helvetica-Neue, Helvetica, sans-serif;
+  cursor: pointer;
+  padding: .55em;
+  border: thin;
+}
+
+.accordion-item-score {
+  float: right;
+}
+
 table th {
   font: 2.4rem/1.6 baseball, Georgia, serif;
   color: #3333AA;

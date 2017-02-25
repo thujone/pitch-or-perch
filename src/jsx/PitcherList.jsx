@@ -1,5 +1,6 @@
 import React from 'react';
 import PitcherDetails from './PitcherDetails.jsx';
+import { Accordion, AccordionItem } from 'react-sanfona';
 
 const PitcherList = React.createClass({
 
@@ -29,51 +30,38 @@ const PitcherList = React.createClass({
         let i = 0;
         let pitcherNodes = this.props.pitcherNodes.map((pitcher) => {
             ++i;
-            /*this.setState({
-                chosenProjections: this.props.pitcherProjections['pitcher' + pitcher.PlayerID],
-                chosenDetails: this.props.pitcherDetails['pitcher' + pitcher.PlayerID]
-            });*/
+
+            var title =
+                <div>{pitcher.Name}
+                    <span className={"accordion-item-score"} style={{backgroundColor: pitcher.TotalScoreColor, textAlign: "center", width: "40px"}}>
+                        {pitcher.TotalScore}
+                    </span>
+                </div>;
 
             return (
-                <tr
-                   key={pitcher.PlayerID}
-                   className="player-header"
-                   aria-expanded="false"
-                   aria-controls={'accordion' + i}
+                <AccordionItem
+                    title={title}
+                    slug={pitcher.PlayerID}
+                    key={pitcher.PlayerID}
+                    className={"accordion-list-item"}
                 >
-                     <td className="td-name"
-                         id={pitcher.PlayerID}
-                         onClick={this.handlePlayerClick}>
-                         {pitcher.Name}
-
-                         <PitcherDetails
-                             chosenProjections = {this.props.pitcherProjections['pitcher' + pitcher.PlayerID]}
-                             chosenDetails = {this.props.pitcherDetails['pitcher' + pitcher.PlayerID]}
-                         />
-
-                     </td>
-                     <td className="td-total-score"
-                         style={{backgroundColor: pitcher.TotalScoreColor,
-                         textAlign: "center"}}>{pitcher.TotalScore}
-                     </td>
-                </tr>
+                    <PitcherDetails
+                        chosenProjections = {this.props.pitcherProjections['pitcher' + pitcher.PlayerID]}
+                        chosenDetails = {this.props.pitcherDetails['pitcher' + pitcher.PlayerID]}
+                    />
+                </AccordionItem>
 
             );
         });
 
         return (
             <div id="pitcher-list">
-                <table id="pitcher-list-table">
-                    <thead>
-                        <tr>
-                            <th className="th-name">Name</th>
-                            <th className="th-score">Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pitcherNodes}
-                    </tbody>
-                </table>
+                <Accordion
+                    className={"accordion-list"}
+                    allowMultiple={false}
+                >
+                    {pitcherNodes}
+                </Accordion>
             </div>
 
 
