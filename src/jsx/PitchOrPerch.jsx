@@ -177,10 +177,10 @@ const PitchOrPerch = React.createClass({
         }
 
         // Sort pitcher list by last name
-        pitcherNodes = _.sortBy(pitcherNodes, function(item) {
-            let names = item.Name.split(' ');
-            return names[1];
-        });
+        // pitcherNodes = _.sortBy(pitcherNodes, function(item) {
+        //     let names = item.Name.split(' ');
+        //     return names[1];
+        // });
 
         console.log('pitcherNodes', pitcherNodes);
 
@@ -234,6 +234,9 @@ const PitchOrPerch = React.createClass({
         if (detailsLoaded == pitcherNodes.length &&
             statsLoaded == pitcherNodes.length) {
             // all data loaded
+            // sort by score
+            pitcherNodes.sort((a, b) => b.TotalScore - a.TotalScore);
+
             this.setState({ pitcherProjections: pitcherProjections,
                             pitcherNodes: pitcherNodes,
                             pitcherDetails: pitcherDetails,

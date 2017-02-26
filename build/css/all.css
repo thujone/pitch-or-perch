@@ -85,7 +85,7 @@ ul {
 
 .accordion-list {
   width: 100%;
-  padding: .55em;
+  padding: .85em;
 }
 
 .accordion-list-item-shell {
@@ -103,7 +103,7 @@ ul {
 .accordion-item-score {
   float: right;
   text-align: center;
-  width: 10%;
+  width: 15%;
   height: 100%;
 }
 
@@ -123,7 +123,7 @@ table th.th-name {
 
 table tr td {
   font: 1.4rem/1.4 strikethemout, Helvetica-Neue, Helvetica, sans-serif;
-  padding: .25em;
+  padding: .85em;
   overflow: hidden;
 }
 

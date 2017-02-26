@@ -254,6 +254,10 @@
 	            }
 	
 	            // Sort pitcher list by last name
+	            // pitcherNodes = _.sortBy(pitcherNodes, function(item) {
+	            //     let names = item.Name.split(' ');
+	            //     return names[1];
+	            // });
 	        } catch (err) {
 	            _didIteratorError = true;
 	            _iteratorError = err;
@@ -268,11 +272,6 @@
 	                }
 	            }
 	        }
-	
-	        pitcherNodes = _.sortBy(pitcherNodes, function (item) {
-	            var names = item.Name.split(' ');
-	            return names[1];
-	        });
 	
 	        console.log('pitcherNodes', pitcherNodes);
 	
@@ -327,6 +326,11 @@
 	    checkDataLoadComplete: function checkDataLoadComplete() {
 	        if (detailsLoaded == pitcherNodes.length && statsLoaded == pitcherNodes.length) {
 	            // all data loaded
+	            // sort by score
+	            pitcherNodes.sort(function (a, b) {
+	                return b.TotalScore - a.TotalScore;
+	            });
+	
 	            this.setState({ pitcherProjections: pitcherProjections,
 	                pitcherNodes: pitcherNodes,
 	                pitcherDetails: pitcherDetails,
