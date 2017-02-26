@@ -13,8 +13,8 @@ const PitcherDetails = React.createClass({
             cd = this.props.chosenDetails;
 
         return (
-            <div class="pitcher-details">
-                <table key="cp.PlayerID" class="player-details-table">
+            <div>
+                <table key="cp.PlayerID">
                     <thead>
                     </thead>
                     <tbody>

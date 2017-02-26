@@ -32,8 +32,8 @@ const PitcherList = React.createClass({
             ++i;
 
             var title =
-                <div>{pitcher.Name}
-                    <span className={"accordion-item-score"} style={{backgroundColor: pitcher.TotalScoreColor, textAlign: "center", width: "40px"}}>
+                <div className={"accordion-list-item-shell"}>{pitcher.Name}
+                    <span className={"accordion-item-score"} style={{backgroundColor: pitcher.TotalScoreColor}}>
                         {pitcher.TotalScore}
                     </span>
                 </div>;

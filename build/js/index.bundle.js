@@ -39790,11 +39790,11 @@
 	
 	            var title = _react2.default.createElement(
 	                'div',
-	                null,
+	                { className: "accordion-list-item-shell" },
 	                pitcher.Name,
 	                _react2.default.createElement(
 	                    'span',
-	                    { className: "accordion-item-score", style: { backgroundColor: pitcher.TotalScoreColor, textAlign: "center", width: "40px" } },
+	                    { className: "accordion-item-score", style: { backgroundColor: pitcher.TotalScoreColor } },
 	                    pitcher.TotalScore
 	                )
 	            );
@@ -39860,10 +39860,10 @@
 	
 	        return _react2.default.createElement(
 	            "div",
-	            { "class": "pitcher-details" },
+	            null,
 	            _react2.default.createElement(
 	                "table",
-	                { key: "cp.PlayerID", "class": "player-details-table" },
+	                { key: "cp.PlayerID" },
 	                _react2.default.createElement("thead", null),
 	                _react2.default.createElement(
 	                    "tbody",
